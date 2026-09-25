@@ -1,0 +1,78 @@
+name: Selah SEO Bot
+
+on:
+  schedule:
+    - cron: "0 12 * * *" # every day 12:00 UTC — POSTS_PER_DAY posts/day
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - run: python main_seo.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: claude-fable-5-1
+          SITE_URL: ${{ vars.SITE_URL }}
+          APP_STORE_URL: ${{ vars.APP_STORE_URL }}
+          POSTS_PER_DAY: ${{ vars.POSTS_PER_DAY || '3' }}
+          AUTO_PUBLISH: ${{ vars.AUTO_PUBLISH || 'false' }}
+
+      # Content state (new post source + updated topic queue) always gets
+      # committed back, regardless of AUTO_PUBLISH — otherwise tomorrow's
+      # run has no memory of what it already wrote. This does NOT include
+      # the built seo/site HTML — that's handled by the Pages artifact
+      # below, not by committing it into the repo.
+      - name: Commit content state
+        run: |
+          git config user.name "selah-seo-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add seo/posts seo/topics.json
+          git diff --staged --quiet || git commit -m "seo bot: new post + updated topic queue"
+          git pull --rebase && git push
+
+      # AUTO_PUBLISH=true: hand the built site to GitHub Pages directly as
+      # a deployment artifact (the "deploy" job below publishes it). This
+      # is the modern Pages method and works with any folder path — the
+      # older "deploy from a branch" method only supports /root or /docs.
+      - name: Upload site for Pages
+        if: ${{ vars.AUTO_PUBLISH == 'true' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: seo/site/
+
+      # AUTO_PUBLISH=false (default): just a downloadable preview, nothing goes live.
+      - name: Upload built site as a preview artifact
+        if: ${{ vars.AUTO_PUBLISH != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-site-preview-${{ github.run_id }}
+          path: seo/site/
+
+  deploy:
+    needs: generate
+    if: ${{ vars.AUTO_PUBLISH == 'true' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
