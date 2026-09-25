@@ -1,7 +1,6 @@
-"""For every targets.csv row with status "ready" (meaning Collin has added
-a contact_email — see README), asks Fable to draft a short, specific pitch.
-Delivers the draft as a real Gmail draft if configured, otherwise as a
-markdown file in outreach/drafts/. Either way, nothing sends itself.
+"""For every targets.csv row with status "ready", asks Claude to draft a short,
+personalized outreach message sharing Selah with that media source.
+Delivers the draft as a markdown file in outreach/drafts/. Nothing sends itself.
 """
 
 import csv
@@ -14,50 +13,59 @@ TARGETS_PATH = Path(__file__).parent / "targets.csv"
 DRAFTS_DIR = Path(__file__).parent / "drafts"
 FIELDNAMES = ["name", "type", "description", "link", "contact_email", "status", "discovered_date", "drafted_date", "notes"]
 
-PITCH_SYSTEM_PROMPT = """You write short, specific outreach pitches for Selah, \
-a minimal, silence-first, non-gamified Bible reading app for men, to podcast \
-hosts and newsletter writers in Christian / men's ministry spaces.
+PITCH_SYSTEM_PROMPT = """You write short, personalized outreach messages for Selah, \
+a minimal, silence-first, non-gamified Bible reading app for men.
+
+Context: Selah is a free iOS app. No streaks, no badges, no push notifications. \
+Just the Bible text and a moment of silence before each reading. Built for men \
+who want to read Scripture without their phone fighting for their attention. \
+App Store link: https://apps.apple.com/us/app/selah-daily-bible/id6798871785
+
+You are reaching out to Christian media sources — podcasts, blogs, newsletters, \
+influencers, churches — to let them know Selah exists and offer them a look at it. \
+You are NOT asking to be a guest on their show. You are sharing a product that \
+their audience would genuinely benefit from.
 
 Rules:
-- 100-150 words. No generic PR-speak, no "I hope this finds you well."
-- Reference the specific show/newsletter by name and something specific \
-  about its description or focus — this must not read as a form letter.
-- State plainly what you're asking for: a mention, a review copy, or being \
-  a guest to talk about building a distraction-free Bible reading habit — \
-  pick whichever fits the target's description best.
-- Warm but brief. End with a low-pressure, specific ask (not "let me know!").
-- Never invent download numbers, user counts, or quotes from reviews.
+- 80-120 words. No generic PR-speak, no "I hope this finds you well."
+- Reference the specific source by name and something specific about their \
+  focus or audience — this must not read as a mass email.
+  - Ask plainly: would they be open to checking out Selah and sharing it with \
+  their audience if they think it fits? Offer to send more info or a promo code.
+  - Warm but brief. One short paragraph of context, one short paragraph of ask.
+  - Never invent download numbers, user counts, or quotes from reviews.
+  - Sign off as "Collin Lorenz" (the builder of Selah).
 
-Respond with ONLY valid JSON: {"subject": "...", "body": "..."}"""
+  Respond with ONLY valid JSON: {"subject": "...", "body": "..."}"""
 
 
 def _load_targets() -> list[dict]:
-    with open(TARGETS_PATH, newline="") as f:
-        return list(csv.DictReader(f))
+      with open(TARGETS_PATH, newline="") as f:
+                return list(csv.DictReader(f))
 
 
 def _save_targets(rows: list[dict]) -> None:
-    with open(TARGETS_PATH, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-        writer.writeheader()
-        writer.writerows(rows)
+      with open(TARGETS_PATH, "w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+                writer.writeheader()
+                writer.writerows(rows)
 
 
 def draft_pending_pitches(create_draft_fn) -> int:
-    """create_draft_fn(to, subject, body) -> str describing where the draft landed.
-    Passed in so this module doesn't need to know if it's Gmail or a markdown file."""
-    rows = _load_targets()
-    drafted = 0
+      """create_draft_fn(to, subject, body) -> str describing where the draft landed.
+          Passed in so this module doesn't need to know if it's Gmail or a markdown file."""
+      rows = _load_targets()
+      drafted = 0
 
     for row in rows:
-        if row["status"] != "ready":
-            continue
+              if row["status"] != "ready":
+                            continue
 
-        pitch = call_fable_json(
-            PITCH_SYSTEM_PROMPT,
-            f"Target: {row['name']} ({row['type']})\nDescription: {row['description']}\nLink: {row['link']}",
-        )
-        location = create_draft_fn(row["contact_email"], pitch["subject"], pitch["body"])
+              pitch = call_fable_json(
+                  PITCH_SYSTEM_PROMPT,
+                  f"Target: {row['name']} ({row['type']})\nDescription: {row['description']}\nLink: {row['link']}",
+              )
+              location = create_draft_fn(row["contact_email"], pitch["subject"], pitch["body"])
 
         row["status"] = "drafted"
         row["drafted_date"] = date.today().isoformat()
@@ -70,9 +78,10 @@ def draft_pending_pitches(create_draft_fn) -> int:
 
 
 def markdown_draft(to: str, subject: str, body: str) -> str:
-    """Fallback when Gmail isn't configured: writes the draft to a file for manual send."""
-    DRAFTS_DIR.mkdir(exist_ok=True)
-        label = to or subject
+      """Fallback when Gmail isn't configured: writes the draft to a file for manual send."""
+      DRAFTS_DIR.mkdir(exist_ok=True)
+      label = to or subject
       safe_name = "".join(c if c.isalnum() else "-" for c in label)[:60]
-    path.write_text(f"To: {to}\nSubject: {subject}\n\n{body}\n")
-    return str(path)
+      path = DRAFTS_DIR / f"{date.today().isoformat()}-{safe_name}.md"
+      path.write_text(f"To: {to}\nSubject: {subject}\n\n{body}\n")
+      return str(path)
