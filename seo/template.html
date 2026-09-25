@@ -21,8 +21,11 @@
   </script>
   </head>
 <body>
+  <nav class="nav">
+      <a class="nav-mark" href="{{ site_url }}/">Selah</a>
+      <a class="nav-cta" href="{{ app_store_url }}">Get the App</a>
+  </nav>
   <div class="wrap">
-      <p class="back"><a href="{{ site_url }}/">&larr; All posts</a></p>
       <article>
             <h1>{{ title }}</h1>
           <p class="meta">{{ date }}</p>
@@ -31,17 +34,20 @@
           </div>
       </article>
     {% if related %}
-    <div class="related">
-        <h2>Related reading</h2>
-        <ul>
-              {% for r in related %}<li><a href="{{ site_url }}/posts/{{ r.slug }}/">{{ r.title }}</a></li>
+    <div class="more-entries">
+        <h2>More entries</h2>
+        <div class="more-grid">
+            {% for r in related %}<a href="{{ site_url }}/posts/{{ r.slug }}/">
+                  <p class="more-title">{{ r.title }}</p>
+                  <p class="more-excerpt">{{ r.meta_description }}</p>
+            </a>
             {% endfor %}
-        </ul>
+        </div>
     </div>
     {% endif %}
     <a class="cta" href="{{ app_store_url }}">Get Selah on the App Store</a>
   </div>
 </body>
 </html>
+  </div>
 </body>
-</html>
