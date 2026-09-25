@@ -72,7 +72,7 @@ def draft_pending_pitches(create_draft_fn) -> int:
 def markdown_draft(to: str, subject: str, body: str) -> str:
     """Fallback when Gmail isn't configured: writes the draft to a file for manual send."""
     DRAFTS_DIR.mkdir(exist_ok=True)
-    safe_name = "".join(c if c.isalnum() else "-" for c in to)[:60]
-    path = DRAFTS_DIR / f"{date.today().isoformat()}-{safe_name}.md"
+        label = to or subject
+      safe_name = "".join(c if c.isalnum() else "-" for c in label)[:60]
     path.write_text(f"To: {to}\nSubject: {subject}\n\n{body}\n")
     return str(path)
