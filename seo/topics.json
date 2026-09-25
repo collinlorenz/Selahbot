@@ -1,18 +1,6 @@
 {
   "queue": [
     {
-      "title": "ESV vs NIV: Which Translation Should You Read Daily?",
-      "keyword": "esv vs niv daily reading"
-    },
-    {
-      "title": "The Case for a Distraction-Free Bible App",
-      "keyword": "distraction free bible app"
-    },
-    {
-      "title": "Building a Consistent Quiet Time as a Busy Dad",
-      "keyword": "quiet time busy dad"
-    },
-    {
       "title": "Bible Reading Plans That Actually Stick",
       "keyword": "bible reading plan that works"
     },
@@ -123,6 +111,21 @@
     {
       "title": "Why Most Bible Apps Feel Like a Chore, and How to Fix It",
       "slug": "why-bible-apps-feel-like-a-chore",
+      "date": "2026-09-25"
+    },
+    {
+      "title": "ESV vs NIV: Which Translation Should You Read Daily?",
+      "slug": "esv-vs-niv-daily-reading",
+      "date": "2026-09-25"
+    },
+    {
+      "title": "The Case for a Distraction-Free Bible App",
+      "slug": "case-for-a-distraction-free-bible-app",
+      "date": "2026-09-25"
+    },
+    {
+      "title": "Building a Consistent Quiet Time as a Busy Dad",
+      "slug": "quiet-time-busy-dad",
       "date": "2026-09-25"
     }
   ]
