@@ -26,7 +26,7 @@ INDEX_TEMPLATE = Template("""<!DOCTYPE html>
 <h1>Selah Blog</h1>
 <ul>
 {% for post in posts %}
-  <li><a href="/posts/{{ post.slug }}/">{{ post.title }}</a><br><small>{{ post.date }}</small></li>
+        <li><a href="{{ site_url }}/posts/{{ post.slug }}/">{{ post.title }}</a><br><small>{{ post.date }}</small></li>
 {% endfor %}
 </ul>
 </body></html>
@@ -80,7 +80,7 @@ def build(site_url: str, app_store_url: str) -> int:
         )
         (post_dir / "index.html").write_text(html)
 
-    (SITE_DIR / "index.html").write_text(INDEX_TEMPLATE.render(posts=posts))
+        (SITE_DIR / "index.html").write_text(INDEX_TEMPLATE.render(posts=posts, site_url=site_url))
     (SITE_DIR / "sitemap.xml").write_text(SITEMAP_TEMPLATE.render(posts=posts, site_url=site_url))
     (SITE_DIR / ".nojekyll").write_text("")  # tells GitHub Pages not to run Jekyll on this
 
