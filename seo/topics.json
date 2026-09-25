@@ -1,18 +1,6 @@
 {
   "queue": [
     {
-      "title": "Bible Reading Plans That Actually Stick",
-      "keyword": "bible reading plan that works"
-    },
-    {
-      "title": "Why Silence Is Harder Than It Looks (And Worth It)",
-      "keyword": "silence and solitude bible"
-    },
-    {
-      "title": "A Beginner's Guide to a Men's Morning Bible Routine",
-      "keyword": "morning bible routine for men"
-    },
-    {
       "title": "Streaks, Badges, and Why Selah Doesn't Use Them",
       "keyword": "non-gamified bible app"
     },
@@ -126,6 +114,21 @@
     {
       "title": "Building a Consistent Quiet Time as a Busy Dad",
       "slug": "quiet-time-busy-dad",
+      "date": "2026-09-25"
+    },
+    {
+      "title": "Bible Reading Plans That Actually Stick",
+      "slug": "bible-reading-plans-that-actually-stick",
+      "date": "2026-09-25"
+    },
+    {
+      "title": "Why Silence Is Harder Than It Looks (And Worth It)",
+      "slug": "why-silence-is-harder-than-it-looks",
+      "date": "2026-09-25"
+    },
+    {
+      "title": "A Beginner's Guide to a Men's Morning Bible Routine",
+      "slug": "beginners-guide-mens-morning-bible-routine",
       "date": "2026-09-25"
     }
   ]
