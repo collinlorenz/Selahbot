@@ -1,0 +1,40 @@
+name: Selah Daily Report
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # every day 13:00 UTC, 1h after both bots run
+  workflow_dispatch: {}
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - run: python report.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: claude-fable-5-1
+          POSTS_PER_DAY: ${{ vars.POSTS_PER_DAY || '3' }}
+          REPORT_EMAIL_TO: ${{ secrets.REPORT_EMAIL_TO }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: "587"
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+
+      - name: Commit report
+        run: |
+          git config user.name "selah-report-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --rebase
+          git add reports
+          git diff --staged --quiet || git commit -m "daily report: $(date +%Y-%m-%d)"
+          git push
